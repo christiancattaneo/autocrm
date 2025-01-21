@@ -57,8 +57,8 @@ export function Layout({ children }: LayoutProps) {
       </header>
       <div className="flex flex-1">
         <aside className="w-[320px] bg-base-100 border-r border-base-300">
-          {/* Only show New Ticket button for customers */}
-          {role === 'customer' && (
+          {/* Show New Ticket button for customers and staff */}
+          {(role === 'customer' || role === 'staff') && (
             <div className="p-4">
               <Link
                 to="/new"

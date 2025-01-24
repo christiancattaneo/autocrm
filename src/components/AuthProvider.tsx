@@ -39,28 +39,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserRole = useCallback(async (userId: string, email: string): Promise<UserRole | null> => {
     console.log('Fetching role for user:', userId)
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle()
+      // First try to get the role directly without RLS
+      const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', {
+        user_id_param: userId
+      })
 
-      if (error) {
-        console.error('Error fetching user role:', error)
+      if (!roleError && roleData) {
+        console.log('Fetched existing role:', roleData)
+        return roleData as UserRole
+      }
+
+      console.log('No role found or error:', roleError)
+      console.log('Checking if first user...')
+      
+      // Check if this is the first user
+      const { count, error: countError } = await supabase
+        .from('user_roles')
+        .select('*', { count: 'exact', head: true })
+
+      if (countError) {
+        console.error('Error checking user count:', countError)
         return null
       }
 
-      if (!data) {
-        console.log('No role found, creating one...')
-        // Get user metadata to check for requested role
-        const { data: { user } } = await supabase.auth.getUser()
-        const requestedRole = user?.user_metadata?.requested_role as UserRole
-        console.log('Found requested role in metadata:', requestedRole)
-        return await createUserRole(userId, email, requestedRole)
+      // If this is the first user, make them an admin
+      if (count === 0) {
+        console.log('First user - creating as admin')
+        return await createUserRole(userId, email, 'admin')
       }
 
-      console.log('Fetched existing role:', data.role)
-      return data.role as UserRole
+      // Otherwise, create as customer
+      console.log('Creating as customer')
+      return await createUserRole(userId, email, 'customer')
     } catch (err) {
       console.error('Unexpected error in fetchUserRole:', err)
       return null

@@ -352,14 +352,17 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
         <div className="bg-base-100 p-6 rounded-box shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-lg font-bold">Customer History</h3>
+              <h3 className="text-lg font-bold text-black">Customer History</h3>
               <p className="text-base-content/70">{showCustomerHistory}</p>
             </div>
             <button 
-              className="btn btn-sm btn-ghost"
+              className="btn btn-sm btn-circle btn-ghost"
               onClick={() => setShowCustomerHistory(null)}
+              aria-label="Close"
             >
-              Close
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
           
@@ -371,16 +374,16 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
             <div className="space-y-4">
               <div className="stats shadow w-full">
                 <div className="stat">
-                  <div className="stat-title">Total Tickets</div>
-                  <div className="stat-value">{customerTickets.length}</div>
+                  <div className="stat-title text-black">Total Tickets</div>
+                  <div className="stat-value text-black">{customerTickets.length}</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-title">Open Tickets</div>
-                  <div className="stat-value">{customerTickets.filter(t => t.status === 'open').length}</div>
+                  <div className="stat-title text-black">Open Tickets</div>
+                  <div className="stat-value text-black">{customerTickets.filter(t => t.status === 'open').length}</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-title">Average Rating</div>
-                  <div className="stat-value">
+                  <div className="stat-title text-black">Average Rating</div>
+                  <div className="stat-value text-black">
                     {customerTickets.some(t => t.rating)
                       ? (customerTickets.reduce((sum, t) => sum + (t.rating || 0), 0) / 
                          customerTickets.filter(t => t.rating).length).toFixed(1)
@@ -404,13 +407,13 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
                   <tbody>
                     {customerTickets.map(ticket => (
                       <tr key={ticket.id} className="hover">
-                        <td>{ticket.title}</td>
+                        <td className="text-black">{ticket.title}</td>
                         <td>
                           <div className={`badge ${
                             ticket.status === 'open' ? 'badge-primary' :
                             ticket.status === 'in_progress' ? 'badge-secondary' :
                             'badge-ghost'
-                          }`}>
+                          } text-black`}>
                             {ticket.status}
                           </div>
                         </td>
@@ -420,11 +423,11 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
                             ticket.priority === 'high' ? 'badge-warning' :
                             ticket.priority === 'medium' ? 'badge-info' :
                             'badge-ghost'
-                          }`}>
+                          } text-black`}>
                             {ticket.priority}
                           </div>
                         </td>
-                        <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
+                        <td className="text-black">{new Date(ticket.created_at).toLocaleDateString()}</td>
                         <td>
                           {ticket.rating ? (
                             <div className="rating rating-sm">
@@ -465,9 +468,9 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
                   Set Status {bulkActionLoading && <span className="loading loading-spinner loading-xs ml-2"></span>}
                 </label>
                 <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                  <li><button onClick={() => handleBulkStatusUpdate('open')} disabled={bulkActionLoading}>Open</button></li>
-                  <li><button onClick={() => handleBulkStatusUpdate('in_progress')} disabled={bulkActionLoading}>In Progress</button></li>
-                  <li><button onClick={() => handleBulkStatusUpdate('resolved')} disabled={bulkActionLoading}>Resolved</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkStatusUpdate('open')} disabled={bulkActionLoading}>Open</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkStatusUpdate('in_progress')} disabled={bulkActionLoading}>In Progress</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkStatusUpdate('resolved')} disabled={bulkActionLoading}>Resolved</button></li>
                 </ul>
               </div>
               <div className="dropdown dropdown-end">
@@ -475,10 +478,10 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
                   Set Priority {bulkActionLoading && <span className="loading loading-spinner loading-xs ml-2"></span>}
                 </label>
                 <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                  <li><button onClick={() => handleBulkPriorityUpdate('low')} disabled={bulkActionLoading}>Low</button></li>
-                  <li><button onClick={() => handleBulkPriorityUpdate('medium')} disabled={bulkActionLoading}>Medium</button></li>
-                  <li><button onClick={() => handleBulkPriorityUpdate('high')} disabled={bulkActionLoading}>High</button></li>
-                  <li><button onClick={() => handleBulkPriorityUpdate('urgent')} disabled={bulkActionLoading}>Urgent</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkPriorityUpdate('low')} disabled={bulkActionLoading}>Low</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkPriorityUpdate('medium')} disabled={bulkActionLoading}>Medium</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkPriorityUpdate('high')} disabled={bulkActionLoading}>High</button></li>
+                  <li><button className="text-black" onClick={() => handleBulkPriorityUpdate('urgent')} disabled={bulkActionLoading}>Urgent</button></li>
                 </ul>
               </div>
             </div>

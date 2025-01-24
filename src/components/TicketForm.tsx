@@ -5,6 +5,7 @@ import { RichTextEditor } from './RichTextEditor'
 import { FileUpload } from './FileUpload'
 import { AttachmentList } from './AttachmentList'
 import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 interface TicketFormProps {
   onTicketCreated?: () => void
@@ -12,6 +13,7 @@ interface TicketFormProps {
 
 export function TicketForm({ onTicketCreated }: TicketFormProps) {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<TicketPriority>('medium')
@@ -119,6 +121,9 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
       setInternalNotes('')
       setAttachments([])
       onTicketCreated?.()
+      
+      // Navigate to the tickets page
+      navigate('/tickets')
     } catch (error) {
       console.error('Error creating ticket:', error)
       alert(error instanceof Error ? error.message : 'Error creating ticket!')
@@ -139,7 +144,7 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="input input-bordered w-full"
+            className="input input-bordered w-full text-black"
             placeholder="Brief description of the issue"
             required
           />
@@ -163,12 +168,12 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as TicketPriority)}
-            className="select select-bordered w-full"
+            className="select select-bordered w-full text-black"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
+            <option className="text-black" value="low">Low</option>
+            <option className="text-black" value="medium">Medium</option>
+            <option className="text-black" value="high">High</option>
+            <option className="text-black" value="urgent">Urgent</option>
           </select>
         </div>
 
@@ -192,7 +197,7 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
           </div>
           <input
             type="text"
-            className="input input-bordered w-full"
+            className="input input-bordered w-full text-black"
             placeholder="Type and press Enter to add tags"
             onKeyDown={handleTagInput}
           />

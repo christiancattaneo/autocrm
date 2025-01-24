@@ -73,25 +73,14 @@ export function Layout({ children }: LayoutProps) {
           </div>
           <nav className="p-4">
             <ul className="menu menu-md">
-              {/* Dashboard - visible to all */}
-              <li>
-                <Link to="/" className="font-medium text-base-content hover:text-base-content">
-                  Dashboard
-                </Link>
-              </li>
-
-              {/* Customer-only links */}
-              {role === 'customer' && (
-                <li>
-                  <Link to="/my-tickets" className="font-medium text-base-content hover:text-base-content">
-                    My Tickets
-                  </Link>
-                </li>
-              )}
-
               {/* Staff and Admin links */}
               {isStaffOrAdmin && (
                 <>
+                  <li>
+                    <Link to="/" className="font-medium text-base-content hover:text-base-content">
+                      Dashboard
+                    </Link>
+                  </li>
                   <li>
                     <Link to="/tickets" className="font-medium text-base-content hover:text-base-content">
                       All Tickets
@@ -103,6 +92,15 @@ export function Layout({ children }: LayoutProps) {
                     </Link>
                   </li>
                 </>
+              )}
+
+              {/* Customer-only links */}
+              {role === 'customer' && (
+                <li>
+                  <Link to="/my-tickets" className="font-medium text-base-content hover:text-base-content">
+                    My Tickets
+                  </Link>
+                </li>
               )}
 
               {/* Admin-only links */}

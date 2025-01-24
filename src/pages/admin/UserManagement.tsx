@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { supabaseAdmin } from '../../lib/supabaseAdmin'
 import { useAuth } from '../../hooks/useAuth'
 
 interface User {
@@ -34,10 +35,8 @@ export function UserManagementPage() {
       }
       if (!roleData) throw new Error('No data returned from query')
 
-      // Then get the user emails in a separate query
-      const { data: userData, error: userError } = await supabase
-        .from('auth.users')
-        .select('id, email')
+      // Use the admin client to get user data
+      const { data: { users: userData }, error: userError } = await supabaseAdmin.auth.admin.listUsers()
 
       if (userError) {
         console.error('Error fetching user data:', userError)
@@ -68,17 +67,12 @@ export function UserManagementPage() {
     e.preventDefault()
     setError('')
     
-    if (!newStaffEmail.endsWith('@autocrm.com')) {
-      setError('Staff emails must end with @autocrm.com')
-      return
-    }
-
     try {
       // Generate a temporary password
       const tempPassword = Math.random().toString(36).slice(-12)
       
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Create auth user using admin client
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: newStaffEmail,
         password: tempPassword,
         email_confirm: true
@@ -131,19 +125,19 @@ export function UserManagementPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-base-content mb-8">User Management</h1>
+      <h1 className="text-2xl font-bold text-black mb-8">User Management</h1>
 
       {/* Create Staff Account Form */}
       <div className="card bg-base-100 shadow-xl mb-8">
         <div className="card-body">
-          <h2 className="card-title">Create Staff Account</h2>
+          <h2 className="card-title text-black">Create Staff Account</h2>
           <form onSubmit={createStaffAccount} className="flex gap-4">
             <input
               type="email"
               value={newStaffEmail}
               onChange={(e) => setNewStaffEmail(e.target.value)}
-              placeholder="staff@autocrm.com"
-              className="input input-bordered flex-1"
+              placeholder="staff@example.com"
+              className="input input-bordered flex-1 text-black"
             />
             <button type="submit" className="btn btn-primary">
               Create Staff Account
@@ -156,7 +150,7 @@ export function UserManagementPage() {
       {/* Users List */}
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title mb-4">Users</h2>
+          <h2 className="card-title text-black mb-4">Users</h2>
           {loading ? (
             <div className="flex justify-center">
               <span className="loading loading-spinner loading-lg"></span>
@@ -166,31 +160,31 @@ export function UserManagementPage() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Created</th>
-                    <th>Actions</th>
+                    <th className="text-black">Email</th>
+                    <th className="text-black">Role</th>
+                    <th className="text-black">Created</th>
+                    <th className="text-black">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
                     <tr key={user.id}>
-                      <td>{user.email}</td>
+                      <td className="text-black">{user.email}</td>
                       <td>
                         <select
                           value={user.role}
                           onChange={(e) => updateUserRole(user.id, e.target.value as 'customer' | 'staff' | 'admin')}
-                          className="select select-bordered select-sm"
+                          className="select select-bordered select-sm text-black"
                         >
-                          <option value="customer">Customer</option>
-                          <option value="staff">Staff</option>
-                          <option value="admin">Admin</option>
+                          <option value="customer" className="text-black">Customer</option>
+                          <option value="staff" className="text-black">Staff</option>
+                          <option value="admin" className="text-black">Admin</option>
                         </select>
                       </td>
-                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                      <td className="text-black">{new Date(user.created_at).toLocaleDateString()}</td>
                       <td>
                         <button 
-                          className="btn btn-sm btn-ghost"
+                          className="btn btn-sm btn-ghost text-black"
                           onClick={() => {/* Add password reset functionality */}}
                         >
                           Reset Password

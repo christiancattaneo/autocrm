@@ -37,7 +37,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                <div className="w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-lg text-base-content">
                     {user?.email?.[0].toUpperCase()}
                   </span>

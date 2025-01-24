@@ -85,17 +85,17 @@ export function TicketPage() {
               type="text"
               value={editedTicket?.title}
               onChange={(e) => setEditedTicket(prev => prev ? { ...prev, title: e.target.value } : null)}
-              className="input input-lg input-bordered w-full max-w-xl"
+              className="input input-lg input-bordered w-full max-w-xl text-black"
             />
           ) : (
-            <h1 className="text-2xl font-bold">{ticket.title}</h1>
+            <h1 className="text-2xl font-bold text-black">{ticket.title}</h1>
           )}
           <div className="flex items-center gap-4 mt-2">
             <div className={`badge ${
               ticket.status === 'open' ? 'badge-error' :
               ticket.status === 'in_progress' ? 'badge-warning' :
               'badge-success'
-            }`}>
+            } text-black`}>
               {ticket.status}
             </div>
             <div className={`badge ${
@@ -103,10 +103,10 @@ export function TicketPage() {
               ticket.priority === 'high' ? 'badge-warning' :
               ticket.priority === 'medium' ? 'badge-info' :
               'badge-ghost'
-            }`}>
+            } text-black`}>
               {ticket.priority}
             </div>
-            <div className="text-sm text-base-content/70">
+            <div className="text-sm text-black">
               Created {new Date(ticket.created_at).toLocaleDateString()}
             </div>
           </div>
@@ -116,7 +116,7 @@ export function TicketPage() {
             {isEditing ? (
               <>
                 <button
-                  className="btn btn-ghost"
+                  className="btn btn-ghost text-black"
                   onClick={() => {
                     setIsEditing(false)
                     setEditedTicket(ticket)
@@ -125,7 +125,7 @@ export function TicketPage() {
                   Cancel
                 </button>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary text-black"
                   onClick={handleSave}
                 >
                   Save Changes
@@ -133,7 +133,7 @@ export function TicketPage() {
               </>
             ) : (
               <button
-                className="btn btn-ghost"
+                className="btn btn-ghost text-black"
                 onClick={() => setIsEditing(true)}
               >
                 Edit
@@ -147,7 +147,7 @@ export function TicketPage() {
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-base-100 rounded-box shadow">
             <div className="p-4 border-b border-base-300">
-              <h2 className="font-bold">Description</h2>
+              <h2 className="font-bold text-black">Description</h2>
             </div>
             <div className="p-4">
               {isEditing ? (
@@ -157,7 +157,7 @@ export function TicketPage() {
                 />
               ) : (
                 <div 
-                  className="prose max-w-none"
+                  className="prose max-w-none text-black"
                   dangerouslySetInnerHTML={{ __html: ticket.description }}
                 />
               )}
@@ -167,9 +167,9 @@ export function TicketPage() {
           {ticket.attachments?.length > 0 && (
             <div className="bg-base-100 rounded-box shadow">
               <div className="p-4 border-b border-base-300">
-                <h2 className="font-bold">Attachments</h2>
+                <h2 className="font-bold text-black">Attachments</h2>
               </div>
-              <div className="p-4">
+              <div className="p-4 text-black">
                 <AttachmentList attachments={ticket.attachments} />
               </div>
             </div>
@@ -178,26 +178,26 @@ export function TicketPage() {
 
         <div className="space-y-4">
           <div className="bg-base-100 rounded-box shadow p-4">
-            <h3 className="font-bold mb-2">Details</h3>
+            <h3 className="font-bold mb-2 text-black">Details</h3>
             <dl className="space-y-2">
               <div>
-                <dt className="text-sm text-base-content/70">Status</dt>
-                <dd className="font-medium text-base-content">{ticket.status}</dd>
+                <dt className="text-sm text-black">Status</dt>
+                <dd className="font-medium text-black">{ticket.status}</dd>
               </div>
               <div>
-                <dt className="text-sm text-base-content/70">Priority</dt>
-                <dd className="font-medium text-base-content">{ticket.priority}</dd>
+                <dt className="text-sm text-black">Priority</dt>
+                <dd className="font-medium text-black">{ticket.priority}</dd>
               </div>
               <div>
-                <dt className="text-sm text-base-content/70">Created</dt>
-                <dd className="font-medium text-base-content">
+                <dt className="text-sm text-black">Created</dt>
+                <dd className="font-medium text-black">
                   {new Date(ticket.created_at).toLocaleDateString()}
                 </dd>
               </div>
               {ticket.resolved_at && (
                 <div>
-                  <dt className="text-sm text-base-content/70">Resolved</dt>
-                  <dd className="font-medium text-base-content">
+                  <dt className="text-sm text-black">Resolved</dt>
+                  <dd className="font-medium text-black">
                     {new Date(ticket.resolved_at).toLocaleDateString()}
                   </dd>
                 </div>
@@ -207,10 +207,10 @@ export function TicketPage() {
 
           {ticket.tags?.length > 0 && (
             <div className="bg-base-100 rounded-box shadow p-4">
-              <h3 className="font-bold mb-2">Tags</h3>
+              <h3 className="font-bold mb-2 text-black">Tags</h3>
               <div className="flex flex-wrap gap-1">
                 {ticket.tags.map(tag => (
-                  <div key={tag} className="badge badge-outline">
+                  <div key={tag} className="badge badge-outline text-black">
                     {tag}
                   </div>
                 ))}

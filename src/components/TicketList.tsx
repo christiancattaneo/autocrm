@@ -348,7 +348,15 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
 
   if (showCustomerHistory) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={(e) => {
+          // Close dialog when clicking the backdrop
+          if (e.target === e.currentTarget) {
+            setShowCustomerHistory(null);
+          }
+        }}
+      >
         <div className="bg-base-100 p-6 rounded-box shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -487,10 +495,10 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => setShowShortcutHelp(true)}
-            className="btn btn-ghost btn-sm text-base-content"
+            className="btn btn-ghost btn-sm text-base-content inline-flex items-center justify-center gap-2"
             title="Keyboard Shortcuts"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -498,7 +506,7 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
             </svg>
           </button>
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-sm text-base-content">
+            <label tabIndex={0} className="btn btn-ghost btn-sm text-base-content inline-flex items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
               </svg>
@@ -562,7 +570,7 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
                 </label>
                 <div className="divider my-1"></div>
                 <button
-                  className="btn btn-sm btn-ghost w-full"
+                  className="btn btn-sm btn-ghost w-full text-black"
                   onClick={() => setViewSettings(defaultViewSettings)}
                 >
                   Reset to Defaults
@@ -572,7 +580,7 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
           </div>
           <button 
             onClick={handleExport}
-            className="btn btn-ghost btn-sm text-base-content"
+            className="btn btn-ghost btn-sm text-base-content inline-flex items-center justify-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -582,20 +590,20 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
           {activeFilters > 0 && (
             <button 
               onClick={clearFilters}
-              className="btn btn-ghost btn-sm text-base-content"
+              className="btn btn-ghost btn-sm text-base-content inline-flex items-center justify-center"
             >
               Clear filters
             </button>
           )}
-          <div className="badge badge-neutral">
+          <div className="badge badge-neutral inline-flex items-center justify-center">
             {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 mb-8">
-        <div className="join w-full">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <input
               type="checkbox"
               className="checkbox"
@@ -604,17 +612,19 @@ export function TicketList({ refreshKey = 0 }: TicketListProps) {
             />
             <span className="text-base-content">Select All</span>
           </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Search tickets... (Press '/' to focus)"
-            className="input input-bordered join-item flex-1"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <div className="flex-1">
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search tickets... (Press '/' to focus)"
+              className="input input-bordered w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           {searchQuery && (
             <button 
-              className="btn join-item"
+              className="btn"
               onClick={() => setSearchQuery('')}
             >
               Clear

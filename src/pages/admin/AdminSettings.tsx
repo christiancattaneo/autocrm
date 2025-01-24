@@ -16,19 +16,19 @@ export function AdminSettingsPage() {
       {/* Tabs */}
       <div className="tabs tabs-boxed mb-8">
         <button 
-          className={`tab ${activeTab === 'teams' ? 'tab-active' : ''}`}
+          className={`tab h-16 px-8 ${activeTab === 'teams' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('teams')}
         >
           Team Management
         </button>
         <button 
-          className={`tab ${activeTab === 'routing' ? 'tab-active' : ''}`}
+          className={`tab h-16 px-8 ${activeTab === 'routing' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('routing')}
         >
           Routing Intelligence
         </button>
         <button 
-          className={`tab ${activeTab === 'data' ? 'tab-active' : ''}`}
+          className={`tab h-16 px-8 ${activeTab === 'data' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('data')}
         >
           Data Management

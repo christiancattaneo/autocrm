@@ -4,15 +4,16 @@ import { TicketPriority, TicketAttachment } from '../types/ticket'
 import { RichTextEditor } from './RichTextEditor'
 import { FileUpload } from './FileUpload'
 import { AttachmentList } from './AttachmentList'
+import { useAuth } from '../hooks/useAuth'
 
 interface TicketFormProps {
   onTicketCreated?: () => void
 }
 
 export function TicketForm({ onTicketCreated }: TicketFormProps) {
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [email, setEmail] = useState('')
   const [priority, setPriority] = useState<TicketPriority>('medium')
   const [tags, setTags] = useState<string[]>([])
   const [internalNotes, setInternalNotes] = useState('')
@@ -65,7 +66,7 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
           {
             title,
             description,
-            customer_email: email,
+            customer_email: user?.email,
             priority,
             status: 'open',
             tags,
@@ -81,7 +82,6 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
       // Clear form
       setTitle('')
       setDescription('')
-      setEmail('')
       setPriority('medium')
       setTags([])
       setInternalNotes('')
@@ -97,7 +97,7 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">New Ticket</h2>
+      <h2 className="text-2xl font-bold mb-6 text-black">New Ticket</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-control">
           <label className="label">
@@ -121,20 +121,6 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
             value={description}
             onChange={setDescription}
             placeholder="Detailed explanation of your issue"
-          />
-        </div>
-
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text font-medium">Email</span>
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input input-bordered w-full"
-            placeholder="your@email.com"
-            required
           />
         </div>
 

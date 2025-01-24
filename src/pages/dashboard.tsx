@@ -86,7 +86,9 @@ export function DashboardPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-base-content">
-            {isStaffOrAdmin ? 'Staff Dashboard' : 'My Dashboard'}
+            {role === 'admin' ? 'Admin Dashboard' : 
+             role === 'staff' ? 'Staff Dashboard' : 
+             'Customer Dashboard'}
           </h1>
           <p className="text-base-content/70 mt-1">
             {isStaffOrAdmin 

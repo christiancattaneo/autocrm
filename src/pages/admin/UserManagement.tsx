@@ -9,16 +9,6 @@ interface User {
   created_at: string
 }
 
-interface UserRole {
-  id: string
-  user_id: string
-  role: string
-  created_at: string
-  auth_user: {
-    email: string
-  } | null
-}
-
 export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,31 +22,38 @@ export function UserManagementPage() {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the roles using our get_user_role function to avoid recursion
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
-        .select(`
-          id,
-          user_id,
-          role,
-          created_at,
-          auth_user:user_id(
-            email
-          )
-        `)
-        .returns<UserRole[]>()
+        .select('*')
+        .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      if (roleError) {
+        console.error('Supabase error:', roleError)
+        throw roleError
       }
-      if (!data) throw new Error('No data returned from query')
+      if (!roleData) throw new Error('No data returned from query')
 
-      const formattedUsers = data.map(userRole => ({
-        id: userRole.user_id,
-        email: userRole.auth_user?.email || 'Unknown',
-        role: userRole.role,
-        created_at: userRole.created_at
-      }))
+      // Then get the user emails in a separate query
+      const { data: userData, error: userError } = await supabase
+        .from('auth.users')
+        .select('id, email')
+
+      if (userError) {
+        console.error('Error fetching user data:', userError)
+        throw userError
+      }
+
+      // Combine the data
+      const formattedUsers = roleData.map(userRole => {
+        const user = userData?.find(u => u.id === userRole.user_id)
+        return {
+          id: userRole.user_id,
+          email: user?.email || 'Unknown',
+          role: userRole.role,
+          created_at: userRole.created_at
+        }
+      })
 
       setUsers(formattedUsers)
     } catch (error) {

@@ -58,9 +58,30 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    console.log('Starting ticket creation...', {
+      user,
+      title,
+      description,
+      priority,
+      tags,
+      internalNotes,
+      attachments
+    })
 
     try {
-      const { error } = await supabase
+      console.log('Attempting to insert ticket with data:', {
+        title,
+        description,
+        customer_email: user?.email,
+        priority,
+        status: 'open',
+        tags,
+        internal_notes: internalNotes || null,
+        custom_fields: {},
+        attachments,
+      })
+
+      const { data, error } = await supabase
         .from('tickets')
         .insert([
           {
@@ -77,7 +98,18 @@ export function TicketForm({ onTicketCreated }: TicketFormProps) {
         ])
         .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('Detailed error from Supabase:', {
+          error,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
+        throw error
+      }
+
+      console.log('Ticket created successfully:', data)
 
       // Clear form
       setTitle('')

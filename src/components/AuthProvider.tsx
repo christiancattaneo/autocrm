@@ -12,41 +12,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Creating user role for:', email, 'requested role:', requestedRole)
     const defaultRole: UserRole = requestedRole || (email.endsWith('@autocrm.com') ? 'staff' : 'customer')
     
-    const { data, error } = await supabase
-      .from('user_roles')
-      .insert([
-        { user_id: userId, role: defaultRole }
-      ])
-      .select('role')
-      .single()
+    // Try up to 3 times to create the role
+    for (let i = 0; i < 3; i++) {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .insert([
+          { user_id: userId, role: defaultRole }
+        ])
+        .select('role')
+        .single()
 
-    if (error) {
-      console.error('Error creating user role:', error)
-      return defaultRole
+      if (!error) {
+        console.log('Created role:', data.role)
+        return data.role
+      }
+
+      console.error(`Error creating user role (attempt ${i + 1}):`, error)
+      // Wait a short time before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
-    console.log('Created role:', data.role)
-    return data.role
+    // If we get here, we failed to create the role after retries
+    throw new Error('Failed to create user role after multiple attempts')
   }, [])
 
   const fetchUserRole = useCallback(async (userId: string, email: string): Promise<UserRole | null> => {
     console.log('Fetching role for user:', userId)
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .maybeSingle()
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle()
 
-    if (error) {
-      if (error.code === 'PGRST116') { // Record not found
-        return await createUserRole(userId, email)
+      if (error) {
+        console.error('Error fetching user role:', error)
+        return null
       }
-      console.error('Error fetching user role:', error)
+
+      if (!data) {
+        console.log('No role found, creating one...')
+        // Get user metadata to check for requested role
+        const { data: { user } } = await supabase.auth.getUser()
+        const requestedRole = user?.user_metadata?.requested_role as UserRole
+        console.log('Found requested role in metadata:', requestedRole)
+        return await createUserRole(userId, email, requestedRole)
+      }
+
+      console.log('Fetched existing role:', data.role)
+      return data.role as UserRole
+    } catch (err) {
+      console.error('Unexpected error in fetchUserRole:', err)
       return null
     }
-
-    console.log('Fetched role:', data?.role)
-    return data?.role as UserRole
   }, [createUserRole])
 
   useEffect(() => {
@@ -139,11 +157,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Attempting sign up for:', email, 'with role:', role)
     
     // Check if this is the first user
-    const { data: existingUsers } = await supabase
+    const { data: existingUsers, error: queryError } = await supabase
       .from('user_roles')
       .select('user_id')
     
+    if (queryError) {
+      console.error('Error checking existing users:', queryError)
+      throw queryError
+    }
+    
     const isFirstUser = !existingUsers || existingUsers.length === 0
+    console.log('Is first user?', isFirstUser, 'Existing users count:', existingUsers?.length)
     
     // Only allow admin/staff registration if it's the first user or if an admin is creating the account
     if ((role === 'admin' || role === 'staff') && !isFirstUser) {
@@ -165,17 +189,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error
     }
 
-    if (data.user) {
-      // Create the user role immediately
-      try {
-        await createUserRole(data.user.id, email, role)
-      } catch (err) {
-        console.error('Error creating user role:', err)
-        // Continue since the user is created, role can be assigned later
-      }
+    if (!data.user) {
+      throw new Error('User creation failed')
     }
 
-    console.log('Signup response:', data)
+    // Create the user role immediately and don't swallow errors
+    const userRole = await createUserRole(data.user.id, email, role)
+    console.log('Successfully created user and role:', { email, role: userRole })
+
     // Return true if email confirmation is required
     return data.session === null
   }

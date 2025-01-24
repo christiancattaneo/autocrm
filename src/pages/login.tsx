@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import type { UserRole } from '../contexts/auth'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [selectedRole, setSelectedRole] = useState<UserRole>('customer')
   const [isSignUp, setIsSignUp] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,8 +40,8 @@ export function LoginPage() {
       validatePassword(password)
 
       if (isSignUp) {
-        console.log('Attempting signup for:', email)
-        const needsEmailConfirmation = await signUp(email, password)
+        console.log('Attempting signup for:', email, 'with role:', selectedRole)
+        const needsEmailConfirmation = await signUp(email, password, selectedRole)
         if (needsEmailConfirmation) {
           setError('Please check your email to confirm your account')
         } else {
@@ -111,6 +113,29 @@ export function LoginPage() {
             )}
           </div>
 
+          {isSignUp && (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base-content/80">Account Type</span>
+              </label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                className="select select-bordered w-full text-base-content"
+                required
+              >
+                <option value="customer">Customer</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+              <label className="label">
+                <span className="label-text-alt text-base-content/60">
+                  Note: The first user can be an admin. After that, only admins can create staff and admin accounts.
+                </span>
+              </label>
+            </div>
+          )}
+
           {error && (
             <div className="alert alert-error">
               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -135,6 +160,7 @@ export function LoginPage() {
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setError('')
+                setSelectedRole('customer') // Reset role when toggling
               }}
             >
               {isSignUp

@@ -1,15 +1,15 @@
 import { createContext } from 'react'
 import type { User } from '@supabase/supabase-js'
 
-export type UserRole = 'customer' | 'staff' | 'admin'
+export type UserRole = 'admin' | 'staff' | 'customer'
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null
   loading: boolean
   role: UserRole | null
   isStaffOrAdmin: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<boolean>
+  signUp: (email: string, password: string, role: UserRole) => Promise<boolean>
   signOut: () => Promise<void>
 }
 

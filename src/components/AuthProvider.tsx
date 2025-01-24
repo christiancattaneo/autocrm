@@ -8,9 +8,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [role, setRole] = useState<UserRole | null>(null)
 
-  const createUserRole = useCallback(async (userId: string, email: string): Promise<UserRole> => {
-    console.log('Creating user role for:', email)
-    const defaultRole: UserRole = email.endsWith('@autocrm.com') ? 'staff' : 'customer'
+  const createUserRole = useCallback(async (userId: string, email: string, requestedRole?: UserRole): Promise<UserRole> => {
+    console.log('Creating user role for:', email, 'requested role:', requestedRole)
+    const defaultRole: UserRole = requestedRole || (email.endsWith('@autocrm.com') ? 'staff' : 'customer')
     
     const { data, error } = await supabase
       .from('user_roles')
@@ -135,17 +135,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Sign in successful')
   }
 
-  const signUp = async (email: string, password: string) => {
-    console.log('Attempting sign up for:', email)
+  const signUp = async (email: string, password: string, role: UserRole) => {
+    console.log('Attempting sign up for:', email, 'with role:', role)
+    
+    // Check if this is the first user
+    const { data: existingUsers } = await supabase
+      .from('user_roles')
+      .select('user_id')
+    
+    const isFirstUser = !existingUsers || existingUsers.length === 0
+    
+    // Only allow admin/staff registration if it's the first user or if an admin is creating the account
+    if ((role === 'admin' || role === 'staff') && !isFirstUser) {
+      throw new Error('Admin and staff accounts can only be created by administrators')
+    }
     
     const { data, error } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        data: {
+          requested_role: role // Store the requested role in user metadata
+        }
+      }
     })
     
     if (error) {
       console.error('Signup error:', error)
       throw error
+    }
+
+    if (data.user) {
+      // Create the user role immediately
+      try {
+        await createUserRole(data.user.id, email, role)
+      } catch (err) {
+        console.error('Error creating user role:', err)
+        // Continue since the user is created, role can be assigned later
+      }
     }
 
     console.log('Signup response:', data)

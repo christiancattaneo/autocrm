@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import type { Ticket } from '../types/ticket'
 import { RichTextEditor } from '../components/RichTextEditor'
 import { AttachmentList } from '../components/AttachmentList'
+import { ResponseGenerator } from '../components/ResponseGenerator'
+import type { CustomerHistory } from '../lib/api'
 
 export function TicketPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null)
@@ -14,6 +16,9 @@ export function TicketPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+
+  // Add new state for customer history
+  const [customerHistory, setCustomerHistory] = useState<CustomerHistory[]>([])
 
   useEffect(() => {
     async function fetchTicket() {
@@ -27,6 +32,17 @@ export function TicketPage() {
         if (error) throw error
         setTicket(data)
         setEditedTicket(data)
+
+        // Fetch customer history
+        const { data: historyData, error: historyError } = await supabase
+          .from('tickets')
+          .select('title, status')
+          .eq('customer_email', data.customer_email)
+          .neq('id', id)
+          .order('created_at', { ascending: false })
+
+        if (historyError) throw historyError
+        setCustomerHistory(historyData)
       } catch (error) {
         console.error('Error fetching ticket:', error)
         navigate('/tickets')
@@ -58,6 +74,12 @@ export function TicketPage() {
       console.error('Error updating ticket:', error)
       alert('Error updating ticket')
     }
+  }
+
+  // Add handler for generated responses
+  const handleResponseGenerated = (response: string) => {
+    setEditedTicket(prev => prev ? { ...prev, description: response } : null)
+    setIsEditing(true)
   }
 
   if (loading) {
@@ -151,10 +173,22 @@ export function TicketPage() {
             </div>
             <div className="p-4">
               {isEditing ? (
-                <RichTextEditor
-                  value={editedTicket?.description || ''}
-                  onChange={(value) => setEditedTicket(prev => prev ? { ...prev, description: value } : null)}
-                />
+                <>
+                  {/* Show ResponseGenerator only for staff/admin users */}
+                  {!ticket.customer_email && (
+                    <div className="mb-4">
+                      <ResponseGenerator
+                        ticket={ticket}
+                        customerHistory={customerHistory}
+                        onResponseGenerated={handleResponseGenerated}
+                      />
+                    </div>
+                  )}
+                  <RichTextEditor
+                    value={editedTicket?.description || ''}
+                    onChange={(value) => setEditedTicket(prev => prev ? { ...prev, description: value } : null)}
+                  />
+                </>
               ) : (
                 <div 
                   className="prose max-w-none text-black"

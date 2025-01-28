@@ -27,8 +27,20 @@ dist-ssr
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.*
+!**/.env.example
 
 # Supabase
 .supabase/
 **/supabase/.temp/
 .vercel
+**/supabase/**/.env
+**/supabase/**/.env.*
+!**/supabase/**/.env.example
+
+# Local secrets
+**/*.key
+**/*.pem
+**/secrets/
+**/.secrets/

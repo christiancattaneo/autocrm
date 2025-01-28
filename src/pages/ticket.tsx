@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -6,6 +6,7 @@ import type { Ticket } from '../types/ticket'
 import { RichTextEditor } from '../components/RichTextEditor'
 import { AttachmentList } from '../components/AttachmentList'
 import { ResponseGenerator } from '../components/ResponseGenerator'
+import { SendEmailModal } from '../components/SendEmailModal'
 import type { CustomerHistory } from '../lib/api'
 
 export function TicketPage() {
@@ -19,40 +20,42 @@ export function TicketPage() {
 
   // Add new state for customer history
   const [customerHistory, setCustomerHistory] = useState<CustomerHistory[]>([])
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+
+  // Extract fetchTicket function from useEffect
+  const fetchTicket = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      setTicket(data)
+      setEditedTicket(data)
+
+      // Fetch customer history
+      const { data: historyData, error: historyError } = await supabase
+        .from('tickets')
+        .select('title, status')
+        .eq('customer_email', data.customer_email)
+        .neq('id', id)
+        .order('created_at', { ascending: false })
+
+      if (historyError) throw historyError
+      setCustomerHistory(historyData)
+    } catch (error) {
+      console.error('Error fetching ticket:', error)
+      navigate('/tickets')
+    } finally {
+      setLoading(false)
+    }
+  }, [id, navigate])
 
   useEffect(() => {
-    async function fetchTicket() {
-      try {
-        const { data, error } = await supabase
-          .from('tickets')
-          .select('*')
-          .eq('id', id)
-          .single()
-
-        if (error) throw error
-        setTicket(data)
-        setEditedTicket(data)
-
-        // Fetch customer history
-        const { data: historyData, error: historyError } = await supabase
-          .from('tickets')
-          .select('title, status')
-          .eq('customer_email', data.customer_email)
-          .neq('id', id)
-          .order('created_at', { ascending: false })
-
-        if (historyError) throw historyError
-        setCustomerHistory(historyData)
-      } catch (error) {
-        console.error('Error fetching ticket:', error)
-        navigate('/tickets')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchTicket()
-  }, [id, navigate])
+  }, [fetchTicket])
 
   const handleSave = async () => {
     if (!editedTicket) return
@@ -80,6 +83,15 @@ export function TicketPage() {
   const handleResponseGenerated = (response: string) => {
     setEditedTicket(prev => prev ? { ...prev, description: response } : null)
     setIsEditing(true)
+  }
+
+  const handleSendEmail = () => {
+    setIsEmailModalOpen(true)
+  }
+
+  const handleEmailSent = () => {
+    // Refresh ticket data after email is sent
+    fetchTicket()
   }
 
   if (loading) {
@@ -188,6 +200,31 @@ export function TicketPage() {
                     value={editedTicket?.description || ''}
                     onChange={(value) => setEditedTicket(prev => prev ? { ...prev, description: value } : null)}
                   />
+                  <div className="flex justify-end gap-2 mt-4">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => {
+                        setIsEditing(false)
+                        setEditedTicket(ticket)
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleSave}
+                    >
+                      Save Changes
+                    </button>
+                    {isStaffOrAdmin && editedTicket && (
+                      <button
+                        className="btn btn-accent"
+                        onClick={handleSendEmail}
+                      >
+                        Send to Customer
+                      </button>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div 
@@ -253,6 +290,18 @@ export function TicketPage() {
           )}
         </div>
       </div>
+
+      {/* Email Modal */}
+      {ticket && (
+        <SendEmailModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          ticketId={ticket.id.toString()}
+          customerEmail={ticket.customer_email}
+          content={editedTicket?.description || ''}
+          onSuccess={handleEmailSent}
+        />
+      )}
     </div>
   )
 } 

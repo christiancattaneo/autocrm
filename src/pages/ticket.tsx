@@ -14,7 +14,7 @@ export function TicketPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editedTicket, setEditedTicket] = useState<Ticket | null>(null)
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, isStaffOrAdmin } = useAuth()
   const navigate = useNavigate()
 
   // Add new state for customer history
@@ -175,7 +175,7 @@ export function TicketPage() {
               {isEditing ? (
                 <>
                   {/* Show ResponseGenerator only for staff/admin users */}
-                  {!ticket.customer_email && (
+                  {isStaffOrAdmin && (
                     <div className="mb-4">
                       <ResponseGenerator
                         ticket={ticket}

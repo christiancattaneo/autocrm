@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Ticket, TicketResponse } from '../types/ticket'
-import { RichTextEditor } from '../components/RichTextEditor'
 import { AttachmentList } from '../components/AttachmentList'
 import { ResponseGenerator } from '../components/ResponseGenerator'
 import { SendEmailModal } from '../components/SendEmailModal'
@@ -218,11 +217,19 @@ export function TicketPage() {
           {/* Show ResponseGenerator for staff/admin users */}
           {isStaffOrAdmin && (
             <div className="bg-base-100 rounded-box shadow p-4">
-              <ResponseGenerator
-                ticket={ticket}
-                customerHistory={customerHistory}
-                onResponseGenerated={handleResponseGenerated}
-              />
+              <div className="flex justify-between items-center mb-4">
+                <ResponseGenerator
+                  ticket={ticket}
+                  customerHistory={customerHistory}
+                  onResponseGenerated={handleResponseGenerated}
+                />
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleSendEmail}
+                >
+                  Send Email
+                </button>
+              </div>
             </div>
           )}
 

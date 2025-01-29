@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import type { Ticket } from '../types/ticket'
+import type { Ticket, TicketResponse } from '../types/ticket'
 import { RichTextEditor } from '../components/RichTextEditor'
 import { AttachmentList } from '../components/AttachmentList'
 import { ResponseGenerator } from '../components/ResponseGenerator'
 import { SendEmailModal } from '../components/SendEmailModal'
+import { ResponseThread } from '../components/ResponseThread'
 import type { CustomerHistory } from '../lib/api'
 
 export function TicketPage() {
@@ -17,10 +18,27 @@ export function TicketPage() {
   const { id } = useParams()
   const { user, isStaffOrAdmin } = useAuth()
   const navigate = useNavigate()
+  const [responses, setResponses] = useState<TicketResponse[]>([])
 
   // Add new state for customer history
   const [customerHistory, setCustomerHistory] = useState<CustomerHistory[]>([])
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+
+  const fetchResponses = useCallback(async () => {
+    if (!id) return
+    try {
+      const { data, error } = await supabase
+        .from('ticket_responses')
+        .select('*')
+        .eq('ticket_id', id)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      setResponses(data || [])
+    } catch (error) {
+      console.error('Error fetching responses:', error)
+    }
+  }, [id])
 
   // Extract fetchTicket function from useEffect
   const fetchTicket = useCallback(async () => {
@@ -55,7 +73,8 @@ export function TicketPage() {
 
   useEffect(() => {
     fetchTicket()
-  }, [fetchTicket])
+    fetchResponses()
+  }, [fetchTicket, fetchResponses])
 
   const handleSave = async () => {
     if (!editedTicket) return
@@ -65,7 +84,6 @@ export function TicketPage() {
         .from('tickets')
         .update({
           title: editedTicket.title,
-          description: editedTicket.description,
         })
         .eq('id', id)
 
@@ -80,9 +98,26 @@ export function TicketPage() {
   }
 
   // Add handler for generated responses
-  const handleResponseGenerated = (response: string) => {
-    setEditedTicket(prev => prev ? { ...prev, description: response } : null)
-    setIsEditing(true)
+  const handleResponseGenerated = async (response: string) => {
+    if (!user || !ticket) return
+
+    try {
+      const { error } = await supabase
+        .from('ticket_responses')
+        .insert({
+          ticket_id: ticket.id,
+          content: response,
+          author_id: user.id,
+          author_email: user.email,
+          response_type: 'ai_generated'
+        })
+
+      if (error) throw error
+      fetchResponses()
+    } catch (error) {
+      console.error('Error saving AI response:', error)
+      alert('Error saving AI response')
+    }
   }
 
   const handleSendEmail = () => {
@@ -92,6 +127,7 @@ export function TicketPage() {
   const handleEmailSent = () => {
     // Refresh ticket data after email is sent
     fetchTicket()
+    fetchResponses()
   }
 
   if (loading) {
@@ -179,59 +215,28 @@ export function TicketPage() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
+          {/* Show ResponseGenerator for staff/admin users */}
+          {isStaffOrAdmin && (
+            <div className="bg-base-100 rounded-box shadow p-4">
+              <ResponseGenerator
+                ticket={ticket}
+                customerHistory={customerHistory}
+                onResponseGenerated={handleResponseGenerated}
+              />
+            </div>
+          )}
+
+          {/* Response Thread */}
           <div className="bg-base-100 rounded-box shadow">
             <div className="p-4 border-b border-base-300">
-              <h2 className="font-bold text-black">Description</h2>
+              <h2 className="font-bold text-black">Conversation</h2>
             </div>
             <div className="p-4">
-              {isEditing ? (
-                <>
-                  {/* Show ResponseGenerator only for staff/admin users */}
-                  {isStaffOrAdmin && (
-                    <div className="mb-4">
-                      <ResponseGenerator
-                        ticket={ticket}
-                        customerHistory={customerHistory}
-                        onResponseGenerated={handleResponseGenerated}
-                      />
-                    </div>
-                  )}
-                  <RichTextEditor
-                    value={editedTicket?.description || ''}
-                    onChange={(value) => setEditedTicket(prev => prev ? { ...prev, description: value } : null)}
-                  />
-                  <div className="flex justify-end gap-2 mt-4">
-                    <button
-                      className="btn btn-ghost"
-                      onClick={() => {
-                        setIsEditing(false)
-                        setEditedTicket(ticket)
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleSave}
-                    >
-                      Save Changes
-                    </button>
-                    {isStaffOrAdmin && editedTicket && (
-                      <button
-                        className="btn btn-accent"
-                        onClick={handleSendEmail}
-                      >
-                        Send to Customer
-                      </button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div 
-                  className="prose max-w-none text-black"
-                  dangerouslySetInnerHTML={{ __html: ticket.description }}
-                />
-              )}
+              <ResponseThread
+                ticketId={ticket.id}
+                responses={responses}
+                onResponseAdded={fetchResponses}
+              />
             </div>
           </div>
 

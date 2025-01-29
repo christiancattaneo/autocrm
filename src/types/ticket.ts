@@ -12,6 +12,19 @@ export interface TicketAttachment {
   url: string
 }
 
+export type ResponseType = 'ai_generated' | 'manual' | 'system'
+
+export interface TicketResponse {
+  id: number
+  ticket_id: number
+  content: string
+  author_id: string
+  author_email: string
+  response_type: ResponseType
+  created_at: string
+  updated_at: string
+}
+
 export interface Ticket {
   id: number
   title: string
@@ -30,4 +43,5 @@ export interface Ticket {
   rating: number | null  // 1-5 star rating
   rating_comment: string | null  // Optional feedback from customer
   rated_at: string | null  // When the rating was submitted
+  responses?: TicketResponse[]  // Added responses field
 } 

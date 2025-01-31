@@ -34,64 +34,96 @@ TICKET DETAILS:
 Title: ${ticket.title}
 Description: ${ticket.description}
 
-Format the response as a structured PRD with the following sections:
+Format the response as a structured PRD with HTML formatting using <h1>, <h2>, <p>, <ul>, and <li> tags for better readability. Follow this structure:
 
-1. Overview
-[Brief description of the product/platform]
+<h1>Product Requirements Document (PRD): [Product Name]</h1>
 
-2. Target Audience
-[Define the primary user base]
+<h2>1. Overview</h2>
+<p>[Brief description of the product/platform]</p>
 
-3. Core Functionality
-[Main purpose and functionality]
+<h2>2. Target Audience</h2>
+<p>[Define the primary user base]</p>
 
-4. Key Features
-[List 4-5 essential features]
+<h2>3. Core Functionality</h2>
+<p>[Main purpose and functionality]</p>
 
-5. Technical Requirements
-- Scalable architecture
-- Security measures
-- Platform support
-- Data synchronization
-- API integrations
+<h2>4. Key Features</h2>
+<ul>
+<li>[Feature 1]</li>
+<li>[Feature 2]</li>
+<li>[Feature 3]</li>
+<li>[Feature 4]</li>
+<li>[Feature 5]</li>
+</ul>
 
-6. User Experience Requirements
-- Navigation design
-- Performance targets
-- Responsive design
-- Accessibility
-- Error handling
+<h2>5. Technical Requirements</h2>
+<ul>
+<li>Scalable architecture</li>
+<li>Security measures</li>
+<li>Platform support</li>
+<li>Data synchronization</li>
+<li>API integrations</li>
+</ul>
 
-7. Security Requirements
-- Authentication
-- Data privacy
-- Compliance needs
-- Security monitoring
-- Payment security (if applicable)
+<h2>6. User Experience Requirements</h2>
+<ul>
+<li>Navigation design</li>
+<li>Performance targets</li>
+<li>Responsive design</li>
+<li>Accessibility</li>
+<li>Error handling</li>
+</ul>
 
-8. Performance Metrics
-- Uptime targets
-- Load times
-- User capacity
-- Caching strategy
-- Monitoring needs
+<h2>7. Security Requirements</h2>
+<ul>
+<li>Authentication</li>
+<li>Data privacy</li>
+<li>Compliance needs</li>
+<li>Security monitoring</li>
+<li>Payment security (if applicable)</li>
+</ul>
 
-9. Success Criteria
-[List measurable success metrics]
+<h2>8. Performance Metrics</h2>
+<ul>
+<li>Uptime targets</li>
+<li>Load times</li>
+<li>User capacity</li>
+<li>Caching strategy</li>
+<li>Monitoring needs</li>
+</ul>
 
-10. Timeline and Phases
-- Phase 1: Core Development
-- Phase 2: Beta Testing
-- Phase 3: Public Launch
-- Phase 4: Enhancements
+<h2>9. Success Criteria</h2>
+<ul>
+<li>[Measurable metric 1]</li>
+<li>[Measurable metric 2]</li>
+<li>[Measurable metric 3]</li>
+<li>[Measurable metric 4]</li>
+</ul>
 
-11. Risks and Mitigation
-[List potential risks and mitigation strategies]
+<h2>10. Timeline and Phases</h2>
+<ul>
+<li>Phase 1: Core Development</li>
+<li>Phase 2: Beta Testing</li>
+<li>Phase 3: Public Launch</li>
+<li>Phase 4: Enhancements</li>
+</ul>
 
-12. Future Considerations
-[List potential future enhancements]
+<h2>11. Risks and Mitigation</h2>
+<ul>
+<li>Risk: [Risk 1] - Mitigation: [Strategy 1]</li>
+<li>Risk: [Risk 2] - Mitigation: [Strategy 2]</li>
+<li>Risk: [Risk 3] - Mitigation: [Strategy 3]</li>
+</ul>
 
-Generate a comprehensive PRD following this structure, ensuring all sections are detailed and specific to the requested platform/product.`
+<h2>12. Future Considerations</h2>
+<ul>
+<li>[Future enhancement 1]</li>
+<li>[Future enhancement 2]</li>
+<li>[Future enhancement 3]</li>
+<li>[Future enhancement 4]</li>
+</ul>
+
+Generate a comprehensive PRD following this structure, ensuring all sections are detailed and specific to the requested platform/product. Use proper HTML formatting for better readability.`
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",

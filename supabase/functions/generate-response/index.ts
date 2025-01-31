@@ -22,38 +22,83 @@ serve(async (req) => {
   }
 
   try {
-    const { ticket, customerHistory, averageRating } = await req.json()
+    const { ticket } = await req.json()
 
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY'),
     })
 
-    const prompt = `Generate a professional and helpful response for a support ticket with the following context:
-    
-    CUSTOMER CONTEXT:
-    - Total Previous Tickets: ${customerHistory.length}
-    - Average Rating: ${averageRating}
-    - Previous Ticket Topics: ${customerHistory.map(t => t.title).join(', ')}
-    
-    CURRENT TICKET:
-    Title: ${ticket.title}
-    Description: ${ticket.description}
-    Status: ${ticket.status}
-    Priority: ${ticket.priority}
-    
-    Generate a response that is:
-    - Professional and courteous
-    - Addresses the specific issue
-    - References their history if relevant
-    - Maintains a consistent support tone
-    - Ends with a clear next step or call to action`
+    const prompt = `Generate a detailed Product Requirements Document (PRD) for the following request:
+
+TICKET DETAILS:
+Title: ${ticket.title}
+Description: ${ticket.description}
+
+Format the response as a structured PRD with the following sections:
+
+1. Overview
+[Brief description of the product/platform]
+
+2. Target Audience
+[Define the primary user base]
+
+3. Core Functionality
+[Main purpose and functionality]
+
+4. Key Features
+[List 4-5 essential features]
+
+5. Technical Requirements
+- Scalable architecture
+- Security measures
+- Platform support
+- Data synchronization
+- API integrations
+
+6. User Experience Requirements
+- Navigation design
+- Performance targets
+- Responsive design
+- Accessibility
+- Error handling
+
+7. Security Requirements
+- Authentication
+- Data privacy
+- Compliance needs
+- Security monitoring
+- Payment security (if applicable)
+
+8. Performance Metrics
+- Uptime targets
+- Load times
+- User capacity
+- Caching strategy
+- Monitoring needs
+
+9. Success Criteria
+[List measurable success metrics]
+
+10. Timeline and Phases
+- Phase 1: Core Development
+- Phase 2: Beta Testing
+- Phase 3: Public Launch
+- Phase 4: Enhancements
+
+11. Risks and Mitigation
+[List potential risks and mitigation strategies]
+
+12. Future Considerations
+[List potential future enhancements]
+
+Generate a comprehensive PRD following this structure, ensuring all sections are detailed and specific to the requested platform/product.`
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "You are a helpful customer support agent who writes clear, concise, and friendly responses."
+          content: "You are a senior product manager who writes clear, comprehensive, and technically accurate PRDs."
         },
         {
           role: "user",
@@ -61,7 +106,7 @@ serve(async (req) => {
         }
       ],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 2000
     })
 
     const response = completion.choices[0].message?.content

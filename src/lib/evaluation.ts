@@ -97,16 +97,20 @@ export async function evaluateResponse(
     RESPONSE:
     {response}
     
-    Evaluate and provide a score from 0-1 for each criterion:
-    1. Relevance: How well does the response address the specific issue?
-    2. Accuracy: Is the information provided correct and reliable?
-    3. Completeness: Does it address all aspects of the query?
-    4. Actionability: Are the next steps or resolution clear?
-    5. Tone: Is the tone appropriate for the situation?
+    Evaluate each criterion and provide a score from 0-1:
+    - Relevance: How well does the response address the specific issue?
+    - Accuracy: Is the information provided correct and reliable?
+    - Completeness: Does it address all aspects of the query?
+    - Actionability: Are the next steps or resolution clear?
+    - Tone: Is the tone appropriate for the situation?
     
-    Also provide specific feedback for improvement.
-    
-    Format your response as JSON.
+    Return your evaluation in strict JSON format with these exact fields:
+    - metrics.relevance (number 0-1)
+    - metrics.accuracy (number 0-1)
+    - metrics.completeness (number 0-1)
+    - metrics.actionability (number 0-1)
+    - metrics.tone (number 0-1)
+    - feedback (string with detailed improvement suggestions)
   `)
 
   try {
@@ -116,8 +120,12 @@ export async function evaluateResponse(
       response: response.content
     })
     
+    console.log("Sending prompt to OpenAI:", formattedPrompt)
     const result = await model.invoke(formattedPrompt)
+    console.log("Received response from OpenAI:", result.text)
+    
     const evaluation = JSON.parse(result.text)
+    console.log("Parsed evaluation:", evaluation)
     
     return {
       responseId: response.id,
